@@ -1,0 +1,62 @@
+CREATE DATABASE IF NOT EXISTS cinefy;
+USE cinefy;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    profileImage VARCHAR(255) DEFAULT 'default-profile.jpg',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS genres (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS movies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    genreId INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    slug VARCHAR(200) NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    releaseYear YEAR NOT NULL,
+    duration INT NOT NULL,
+    poster VARCHAR(255) NOT NULL UNIQUE,
+    director VARCHAR(100) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_genre_id FOREIGN KEY (genreId) REFERENCES genres(id) ON DELETE CASCADE 
+);
+
+CREATE TABLE IF NOT EXISTS ratings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    movieId INT NOT NULL,
+    ratingValue TINYINT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_rating_value CHECK (ratingValue BETWEEN 1 AND 5),
+    CONSTRAINT unique_user_movie_rating UNIQUE (userId, movieId),
+    CONSTRAINT fk_user_id FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_movie_id FOREIGN KEY (movieId) REFERENCES movies(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    movieId INT NOT NULL,
+    comment TEXT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_comments_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comments_movie FOREIGN KEY (movieId) REFERENCES movies(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS favorites (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    movieId INT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_user_movie_favorite UNIQUE (userId, movieId),
+    CONSTRAINT fk_favorites_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_favorites_movie FOREIGN KEY (movieId) REFERENCES movies(id) ON DELETE CASCADE
+);
